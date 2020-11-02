@@ -10,8 +10,6 @@ import config
 from encoder.generator_model import Generator
 from encoder.perceptual_model import PerceptualModel
 
-URL_FFHQ = 'https://drive.google.com/uc?id=1MEGjdvVpUsu1jB4zrXZN7Y4kBBOzizDQ'  # karras2019stylegan-ffhq-1024x1024.pkl
-
 
 def split_to_batches(l, n):
     for i in range(0, len(l), n):
@@ -20,6 +18,7 @@ def split_to_batches(l, n):
 
 def main():
     parser = argparse.ArgumentParser(description='Find latent representation of reference images using perceptual loss')
+    parser.add_argument('model', help="Model file")
     parser.add_argument('src_dir', help='Directory with images for encoding')
     parser.add_argument('generated_images_dir', help='Directory for storing generated images')
     parser.add_argument('dlatent_dir', help='Directory for storing dlatent representations')
@@ -47,8 +46,7 @@ def main():
 
     # Initialize generator and perceptual model
     tflib.init_tf()
-    with dnnlib.util.open_url(URL_FFHQ, cache_dir=config.cache_dir) as f:
-        generator_network, discriminator_network, Gs_network = pickle.load(f)
+    generator_network, discriminator_network, Gs_network = pickle.load(open(args.model))
 
     generator = Generator(Gs_network, args.batch_size, randomize_noise=args.randomize_noise)
     perceptual_model = PerceptualModel(args.image_size, layer=9, batch_size=args.batch_size)
